@@ -76,7 +76,7 @@ LABEL2GRADE = {
     'mild dr': 1, 'mild': 1, '1': 1,
     'moderate dr': 2, 'moderate': 2, '2': 2,
     'severe dr': 3, 'severe': 3, '3': 3,
-    'proliferative dr': 4, 'proliferative': 4, 'pdr': 4, '4': 4,
+    'proliferative dr': 4, 'proliferative': 4, 'proliferate dr': 4, 'proliferate': 4, 'pdr': 4, '4': 4,
 }
 
 def to_grade(label):
