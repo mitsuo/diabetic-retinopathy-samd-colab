@@ -26,4 +26,6 @@
 ## ファイル
 
 - `diabetic_retinopathy_samd.ipynb` ― ノートブック本体
+- `diabetic_retinopathy_samd_executed.ipynb` ― 実行結果入りのノートブック（QUICK_MODE での確認実行、2026-11-23）。実行前に出力結果を確認したい場合はこちらを参照
+  - 参考値（QUICK_MODE：土台凍結・訓練データ半分・5 エポック）：テスト QWK 0.687、referable DR の AUC 0.908、閾値 0.5 で感度 0.903・特異度 0.738
 - `build_notebook.py` ― ノートブックを生成するスクリプト
