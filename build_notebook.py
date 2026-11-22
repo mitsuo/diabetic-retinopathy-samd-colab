@@ -154,9 +154,10 @@ class FundusDataset(Dataset):
         return self.transform(images[j]), int(grades[j])
 
 BATCH_SIZE = 32
-train_loader = DataLoader(FundusDataset(idx_train, train_transform), batch_size=BATCH_SIZE, shuffle=True)
-valid_loader = DataLoader(FundusDataset(idx_valid, eval_transform), batch_size=BATCH_SIZE, shuffle=False)
-test_loader = DataLoader(FundusDataset(idx_test, eval_transform), batch_size=BATCH_SIZE, shuffle=False)""")
+# num_workers で画像の前処理を並列化し、GPU を待たせない（高速化の要点）
+train_loader = DataLoader(FundusDataset(idx_train, train_transform), batch_size=BATCH_SIZE, shuffle=True, num_workers=2, pin_memory=True)
+valid_loader = DataLoader(FundusDataset(idx_valid, eval_transform), batch_size=BATCH_SIZE, shuffle=False, num_workers=2, pin_memory=True)
+test_loader = DataLoader(FundusDataset(idx_test, eval_transform), batch_size=BATCH_SIZE, shuffle=False, num_workers=2, pin_memory=True)""")
 
 # ---------------------------------------------------------------- model
 md("""## 3. モデル：EfficientNet-B0 の転移学習
@@ -199,16 +200,20 @@ code("""def predict(loader, model):
 NUM_EPOCHS = 8
 PATIENCE = 3
 best_qwk, wait, history = -1.0, 0, []
+use_amp = (device.type == 'cuda')  # 混合精度（AMP）で GPU の計算を高速化
+scaler = torch.amp.GradScaler('cuda', enabled=use_amp)
 
 for epoch in range(NUM_EPOCHS):
     model.train()
     running_loss = 0.0
     for x, y in train_loader:
-        x, y = x.to(device), y.to(device)
-        loss = criterion(model(x), y)
+        x, y = x.to(device, non_blocking=True), y.to(device, non_blocking=True)
+        with torch.autocast(device_type='cuda', enabled=use_amp):
+            loss = criterion(model(x), y)
         optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
+        scaler.scale(loss).backward()
+        scaler.step(optimizer)
+        scaler.update()
         running_loss += loss.item() / len(train_loader)
 
     y_true, y_prob = predict(valid_loader, model)
