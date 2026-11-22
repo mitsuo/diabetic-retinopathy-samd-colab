@@ -32,7 +32,7 @@ md("""# 糖尿病網膜症の眼底画像自動分類 ― Colab 実習ノート�
 
 # ---------------------------------------------------------------- setup
 code("""# 必要なライブラリのインストール（Colab では torch は導入済み）
-!pip install -q datasets pytorch-grad-cam
+!pip install -q datasets grad-cam
 
 import numpy as np
 import pandas as pd
@@ -291,7 +291,7 @@ md("""## 6. Grad-CAM：モデルはどこを見ているか
 
 分類の根拠となった画像領域を Grad-CAM で可視化します。病変（出血・白斑など）の周辺が熱くなっていれば望ましいですが、**それらしく見えるヒートマップが正しい根拠とは限らない**点も、説明可能性の限界として講義で触れたとおりです。""")
 
-code("""!pip install -q pytorch-grad-cam
+code("""!pip install -q grad-cam
 from pytorch_grad_cam import GradCAM
 from pytorch_grad_cam.utils.image import show_cam_on_image
 from pytorch_grad_cam.utils.model_targets import ClassifierOutputTarget
