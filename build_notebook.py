@@ -368,12 +368,18 @@ elif os.path.exists('kaggle.json'):
     auth_ready = True
 
 if auth_ready:
+    !pip install -q -U kaggle
     !kaggle competitions download -c aptos2019-blindness-detection
+
+if auth_ready and os.path.exists('aptos2019-blindness-detection.zip'):
     !unzip -q aptos2019-blindness-detection.zip -d aptos2019
     aptos = pd.read_csv('aptos2019/train.csv')
     print(aptos['diagnosis'].value_counts().sort_index())
     print('画像は aptos2019/train_images/ 以下（id_code.png）。')
     print('images / grades をこの形式に作り直せば、以降のセルをそのまま使えます。')
+elif auth_ready:
+    print('ダウンロードできませんでした（403 の場合はコンペのルール未同意が原因のことが多いです）。')
+    print('https://www.kaggle.com/competitions/aptos2019-blindness-detection で参加・ルール同意をしてから再実行してください。')
 else:
     print('認証ファイル（access_token）がないためスキップしました（本文のデータセットで実習できます）。')""")
 
