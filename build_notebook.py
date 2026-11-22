@@ -162,7 +162,9 @@ test_loader = DataLoader(FundusDataset(idx_test, eval_transform), batch_size=BAT
 # ---------------------------------------------------------------- model
 md("""## 3. モデル：EfficientNet-B0 の転移学習
 
-ImageNet で学習済みの EfficientNet-B0 を土台に、最終層だけを 5 クラス用に付け替えて全体を微調整（fine-tuning）します。
+ImageNet で学習済みの EfficientNet-B0 を土台に、最終層を 5 クラス用に付け替えます。
+
+標準設定の **QUICK_MODE（軽量モード）** では土台を凍結し、最終層だけを学習します。無料 Colab の GPU でも短時間で終わるための設定で、転移学習の考え方と評価の流れはそのまま体験できます。計算資源に余裕がある場合は QUICK_MODE = False にすると、全体を微調整する fine-tuning になります。
 
 クラス不均衡への対処として、損失関数に **クラス重み**（頻度の逆数に比例）を付け、枚数の少ない重症クラスでの誤りを重く扱います。""")
 
@@ -175,12 +177,21 @@ code("""def build_model():
 
 model = build_model().to(device)
 
-train_counts = np.bincount(grades[idx_train], minlength=5).astype(np.float64)
+QUICK_MODE = True  # True: 土台を凍結し最終層だけ学習＋訓練データを半分に（無料 Colab 向け）／ False: 全体を fine-tuning
+train_idx_eff = idx_train
+if QUICK_MODE:
+    for p in model.features.parameters():
+        p.requires_grad = False
+    train_idx_eff = idx_train[::2]
+    train_loader = DataLoader(FundusDataset(train_idx_eff, train_transform), batch_size=BATCH_SIZE, shuffle=True, num_workers=2, pin_memory=True)
+    print('QUICK_MODE: backbone frozen; training images:', len(train_idx_eff))
+
+train_counts = np.bincount(grades[train_idx_eff], minlength=5).astype(np.float64)
 class_weights = torch.tensor(train_counts.sum() / (5 * train_counts), dtype=torch.float32).to(device)
 print('class weights:', class_weights.cpu().numpy().round(3))
 
 criterion = torch.nn.CrossEntropyLoss(weight=class_weights)
-optimizer = torch.optim.AdamW(model.parameters(), lr=1e-4, weight_decay=1e-4)""")
+optimizer = torch.optim.AdamW([p for p in model.parameters() if p.requires_grad], lr=1e-3 if QUICK_MODE else 1e-4, weight_decay=1e-4)""")
 
 # ---------------------------------------------------------------- training
 md("""## 4. 学習（検証 QWK で最良モデルを保存）
@@ -197,7 +208,7 @@ code("""def predict(loader, model):
             y_true.append(y.numpy())
     return np.concatenate(y_true), np.concatenate(y_prob)
 
-NUM_EPOCHS = 8
+NUM_EPOCHS = 5 if QUICK_MODE else 8
 PATIENCE = 3
 best_qwk, wait, history = -1.0, 0, []
 use_amp = (device.type == 'cuda')  # 混合精度（AMP）で GPU の計算を高速化
