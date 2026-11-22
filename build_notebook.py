@@ -354,12 +354,20 @@ md("""## 7. 考察：この結果をどう読むか
 # ---------------------------------------------------------------- appendix
 md("""## 付録：APTOS 2019（Kaggle）で学習する場合
 
-講義で紹介した APTOS 2019 は Kaggle からのダウンロードにアカウントと API トークンが必要です。Colab のファイルパネルに `kaggle.json` をアップロードしてから、以下のセルを実行すると同じ形式で読み込めます（未アップロードならセルは自動でスキップされます）。""")
+講義で紹介した APTOS 2019 は Kaggle からのダウンロードにアカウントと API トークンが必要です。現在の Kaggle の標準は、設定画面（Settings → API → Generate New Token）で発行したトークンをファイル `access_token` として置く方式で、旧来の `kaggle.json` はレガシー扱いになっています。Colab のファイルパネルに `access_token`（なければ `kaggle.json` でも可）をアップロードしてから、以下のセルを実行するとダウンロードできます（未アップロードならセルは自動でスキップされます）。""")
 
-code("""import os, glob
+code("""import os
 
-if os.path.exists('kaggle.json'):
-    !mkdir -p ~/.kaggle && cp kaggle.json ~/.kaggle/ && chmod 600 ~/.kaggle/kaggle.json
+os.makedirs(os.path.expanduser('~/.kaggle'), exist_ok=True)
+auth_ready = False
+if os.path.exists('access_token'):
+    !cp access_token ~/.kaggle/access_token && chmod 600 ~/.kaggle/access_token
+    auth_ready = True
+elif os.path.exists('kaggle.json'):
+    !cp kaggle.json ~/.kaggle/kaggle.json && chmod 600 ~/.kaggle/kaggle.json
+    auth_ready = True
+
+if auth_ready:
     !kaggle competitions download -c aptos2019-blindness-detection
     !unzip -q aptos2019-blindness-detection.zip -d aptos2019
     aptos = pd.read_csv('aptos2019/train.csv')
@@ -367,7 +375,7 @@ if os.path.exists('kaggle.json'):
     print('画像は aptos2019/train_images/ 以下（id_code.png）。')
     print('images / grades をこの形式に作り直せば、以降のセルをそのまま使えます。')
 else:
-    print('kaggle.json がないためスキップしました（本文のデータセットで実習できます）。')""")
+    print('認証ファイル（access_token）がないためスキップしました（本文のデータセットで実習できます）。')""")
 
 nb = {
     "nbformat": 4, "nbformat_minor": 0,
