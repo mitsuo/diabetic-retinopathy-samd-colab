@@ -1,10 +1,12 @@
 # 糖尿病網膜症の眼底画像自動分類 ― Colab 実習ノートブック
 
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mitsuo/diabetic-retinopathy-samd-colab/blob/main/diabetic_retinopathy_samd.ipynb)
+
 糖尿病網膜症（diabetic retinopathy）の眼底画像を深層学習で 5 段階の重症度に自動分類し、医療AIとしての性能評価（混同行列・二次重み付き κ・ROC/AUC・感度／特異度・Grad-CAM）までを行う、Google Colab 用の実習ノートブックです。大学院講義「医療DX・AI特論」（糖尿病網膜症の眼底画像を自動分類する SaMD の回）の演習用に作成しました。
 
 ## Colab で開く
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/mitsuo/diabetic-retinopathy-samd-colab/blob/main/diabetic_retinopathy_samd.ipynb)
+上のバッジから Colab で開けます。
 
 1. Colab で「ランタイム」→「ランタイムのタイプを変更」→ GPU（T4 など）を選択
 2. 「ランタイム」→「すべてのセルを実行」（データのダウンロードと学習で 15〜25 分程度）
