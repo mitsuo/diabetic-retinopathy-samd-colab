@@ -32,11 +32,12 @@ md("""# 糖尿病網膜症の眼底画像自動分類 ― Colab 実習ノート�
 
 # ---------------------------------------------------------------- setup
 code("""# 必要なライブラリのインストール（Colab では torch は導入済み）
-!pip install -q datasets grad-cam
+!pip install -q datasets grad-cam japanize-matplotlib
 
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import japanize_matplotlib  # noqa: F401  matplotlib で日本語を表示するためのフォント設定
 import PIL.Image
 
 import sklearn.metrics
